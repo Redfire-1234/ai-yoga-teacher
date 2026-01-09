@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Yoga Teacher</title>
+
+<style>
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI", Tahoma, sans-serif;
+}
+
+body {
+    height:100vh;
+    width:100vw;
+    background: linear-gradient(135deg, #1E1E2F, #2A2A45);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    color:#F5F5F5;
+}
+
+body::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background: rgba(0,0,0,0.55);
+    z-index:1;
+}
+
+.container {
+    z-index:2;
+    text-align:center;
+    animation: fadeIn 1s ease;
+}
+
+.avatar {
+    width:320px;
+    animation: float 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 25px rgba(255,255,255,0.3));
+}
+
+h1 {
+    font-size:48px;
+    margin:30px 0 10px;
+}
+
+p {
+    font-size:18px;
+    opacity:0.85;
+    margin-bottom:40px;
+}
+
+button {
+    padding:18px 55px;
+    font-size:20px;
+    border:none;
+    border-radius:40px;
+    background:#a8e063;
+    color:#1a1a1a;
+    font-weight:bold;
+    cursor:pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background:#88c455;
+    transform: scale(1.05);
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity:0; transform: translateY(20px); }
+    to { opacity:1; transform: translateY(0); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <img
+        src="https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png"
+        alt="AI Yoga Teacher"
+        class="avatar"
+    >
+
+    <h1>AI Yoga Teacher</h1>
+    <p>Your personal guide to mindful living</p>
+
+    <!-- CONNECTS TO SECOND CODE -->
+    <button onclick="window.location.href='chat.html'">
+        Begin Your Practice
+    </button>
+</div>
+
+</body>
+</html>
