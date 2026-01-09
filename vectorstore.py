@@ -1,11 +1,12 @@
 import faiss
 import pickle
 import numpy as np
-from sentence_transformers import SentenceTransformer
+import requests
 from huggingface_hub import hf_hub_download
 from typing import List, Tuple
 import logging
 from config import settings
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -13,17 +14,14 @@ logger = logging.getLogger(__name__)
 class VectorStore:
     def __init__(self):
         """Initialize the vector store by loading FAISS index and metadata from HuggingFace"""
-        self.embedding_model = None
         self.index = None
         self.metadata = None
+        self.hf_token = os.getenv("HF_TOKEN", None)  # Optional: for rate limits
         self.load_vectorstore()
     
     def load_vectorstore(self):
         """Load FAISS index and metadata from HuggingFace repository"""
         try:
-            logger.info("Loading embedding model...")
-            self.embedding_model = SentenceTransformer(settings.EMBEDDING_MODEL)
-            
             logger.info(f"Downloading FAISS index from HuggingFace: {settings.HF_REPO_ID}")
             faiss_path = hf_hub_download(
                 repo_id=settings.HF_REPO_ID,
@@ -54,12 +52,39 @@ class VectorStore:
             raise
     
     def embed_query(self, query: str) -> np.ndarray:
-        """Convert query text to embedding vector"""
+        """
+        Convert query text to embedding vector using HuggingFace Inference API
+        This uses NO local RAM for model loading!
+        """
         try:
-            embedding = self.embedding_model.encode([query], show_progress_bar=False)
+            api_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{settings.EMBEDDING_MODEL}"
+            
+            headers = {}
+            if self.hf_token:
+                headers["Authorization"] = f"Bearer {self.hf_token}"
+            
+            response = requests.post(
+                api_url,
+                headers=headers,
+                json={"inputs": query, "options": {"wait_for_model": True}}
+            )
+            
+            if response.status_code != 200:
+                raise Exception(f"HF API error: {response.status_code} - {response.text}")
+            
+            embedding = np.array(response.json())
+            
+            # Handle different response formats
+            if len(embedding.shape) == 1:
+                embedding = embedding.reshape(1, -1)
+            elif len(embedding.shape) == 3:
+                # Some models return [batch, tokens, dims] - take mean over tokens
+                embedding = embedding.mean(axis=1)
+            
             return embedding.astype('float32')
+            
         except Exception as e:
-            logger.error(f"Error embedding query: {e}")
+            logger.error(f"Error embedding query via HF API: {e}")
             raise
     
     def search(self, query: str, top_k: int = None) -> List[Tuple[str, float]]:
@@ -77,7 +102,7 @@ class VectorStore:
             top_k = settings.TOP_K_RESULTS
         
         try:
-            # Embed the query
+            # Embed the query using HF API (no local RAM needed!)
             query_vector = self.embed_query(query)
             
             # Search in FAISS index
