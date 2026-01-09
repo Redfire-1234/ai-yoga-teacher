@@ -8,7 +8,7 @@ import json
 import time
 
 # Configuration
-BASE_URL = "http://localhost:8000"  # Change to your Render URL when deployed
+BASE_URL = "https://ai-yoga-teacher.onrender.com"  # Your Render URL 
 SESSION_ID = "test_session_123"
 
 def test_health_check():
@@ -141,4 +141,5 @@ if __name__ == "__main__":
     print(f"Target URL: {BASE_URL}")
     print(f"Session ID: {SESSION_ID}\n")
     
+
     run_all_tests()
