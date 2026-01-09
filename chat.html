@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Yoga Teacher - Chat</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:"Segoe UI", Tahoma, sans-serif; }
+body {
+    height:100vh; width:100vw;
+    background: linear-gradient(135deg, #1E1E2F, #2A2A45);
+    display:flex; justify-content:center; align-items:center;
+    overflow:hidden; color:#F5F5F5;
+}
+.container {
+    width:90%; height:85%; display:flex; border-radius:20px; overflow:hidden;
+    box-shadow:0 10px 40px rgba(0,0,0,0.6); animation: slideIn 0.5s;
+}
+@keyframes slideIn { from{transform:translateY(50px); opacity:0;} to{transform:translateY(0); opacity:1;} }
+.left-panel {
+    flex:0 0 300px; background: rgba(30,30,50,0.6); backdrop-filter: blur(10px);
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    padding:30px 20px; gap:20px;
+}
+.avatar { width:180px; border-radius:50%; animation: float 4s ease-in-out infinite; }
+.ai-name { font-size:20px; font-weight:bold; text-align:center; }
+.ai-status { font-size:14px; color:#A0FFA0; text-align:center; }
+.yoga-style { 
+    font-size:16px; padding:10px 20px; background: rgba(168,224,99,0.2); 
+    border-radius:20px; margin-top:10px; text-align:center;
+}
+.connection-status {
+    font-size:12px; padding:5px 10px; border-radius:15px;
+    background: rgba(255,255,255,0.1); margin-top:10px;
+}
+.status-online { color:#A0FFA0; }
+.status-offline { color:#FF6B6B; }
+.back-btn {
+    margin-top:auto; padding:12px 24px; background:rgba(168,224,99,0.3);
+    border:none; border-radius:20px; color:#F5F5F5; cursor:pointer;
+    font-size:14px; font-weight:bold; transition:all 0.3s;
+}
+.back-btn:hover { background:rgba(168,224,99,0.5); transform:scale(1.05); }
+.right-panel {
+    flex:1; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);
+    display:flex; flex-direction:column; justify-content:flex-end; padding:20px;
+}
+.chat-box {
+    flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:12px; margin-bottom:15px;
+}
+.chat-box::-webkit-scrollbar { width:8px; }
+.chat-box::-webkit-scrollbar-track { background:rgba(255,255,255,0.05); border-radius:10px; }
+.chat-box::-webkit-scrollbar-thumb { background:rgba(168,224,99,0.3); border-radius:10px; }
+.message-row { display:flex; align-items:flex-end; gap:10px; opacity:0; animation: fadeIn 0.5s forwards; }
+.message-row.ai { justify-content:flex-start; }
+.message-row.user { justify-content:flex-end; }
+.avatar-small { width:40px; height:40px; border-radius:50%; flex-shrink:0; }
+.message { 
+    max-width:70%; padding:12px 16px; border-radius:20px; font-size:16px; 
+    word-wrap: break-word; line-height:1.5;
+}
+.user .message { 
+    background:#a8e063; color:#1a1a1a; 
+    border-bottom-right-radius:0; border-bottom-left-radius:20px; 
+}
+.ai .message { 
+    border-bottom-left-radius:0; border-bottom-right-radius:20px; 
+    background: rgba(255,255,255,0.9); color:#1a1a1a; 
+}
+.error-message { background:#FF6B6B !important; color:#fff !important; }
+.input-area { display:flex; gap:10px; }
+input { 
+    flex:1; padding:15px; border-radius:30px; border:none; font-size:16px; 
+    outline:none; background: rgba(255,255,255,0.08); color:#F5F5F5; 
+}
+input::placeholder { color:#ccc; }
+input:disabled { opacity:0.5; cursor:not-allowed; }
+button { 
+    padding:15px 30px; border-radius:30px; border:none; background:#a8e063; 
+    font-weight:bold; cursor:pointer; transition: all 0.3s; 
+}
+button:hover:not(:disabled) { background:#88c455; transform: scale(1.05); }
+button:disabled { opacity:0.5; cursor:not-allowed; }
+@keyframes float { 0%{transform:translateY(0);}50%{transform:translateY(-5px);}100%{transform:translateY(0);} }
+@keyframes fadeIn { to{opacity:1;} }
+.typing { display:flex; align-items:center; gap:5px; padding:12px 16px; }
+.dot { width:8px; height:8px; background:#666; border-radius:50%; animation:bounce 1s infinite; }
+.dot:nth-child(2) { animation-delay:0.2s; }
+.dot:nth-child(3) { animation-delay:0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:scale(0);}40%{transform:scale(1);} }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <!-- Left panel -->
+    <div class="left-panel">
+        <img src="https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png" class="avatar" alt="AI Avatar">
+        <div class="ai-name">Yoga Master Dhalsim</div>
+        <div class="ai-status">🧘‍♂️ Ready to guide you</div>
+        <div class="yoga-style" id="yogaStyle">Hatha Yoga</div>
+        <div class="connection-status" id="connectionStatus">
+            <span class="status-offline">● Connecting...</span>
+        </div>
+        <button class="back-btn" onclick="window.location.href='styles.html'">← Back to Styles</button>
+    </div>
+
+    <!-- Right panel -->
+    <div class="right-panel">
+        <div class="chat-box" id="chatBox">
+            <div class="message-row ai">
+                <img src="https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png" class="avatar-small" alt="AI Avatar">
+                <div class="message">Namaste 🙏 I am your AI Yoga Teacher. How can I guide you today?</div>
+            </div>
+        </div>
+
+        <!-- Input area -->
+        <div class="input-area">
+            <input id="userInput" type="text" placeholder="Type your message..." disabled>
+            <button onclick="sendMessage()" id="sendBtn" disabled>Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Configuration - CHANGE THIS TO YOUR RENDER URL AFTER DEPLOYMENT
+const API_URL = "http://localhost:8000"; // For local testing
+// const API_URL = "https://your-app.onrender.com"; // Uncomment for production
+
+const SESSION_ID = "user_" + Math.random().toString(36).substr(2, 9);
+
+const chatBox = document.getElementById("chatBox");
+const inputBox = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendBtn");
+const statusEl = document.getElementById("connectionStatus");
+const yogaStyleEl = document.getElementById("yogaStyle");
+
+// Get yoga style from URL
+const urlParams = new URLSearchParams(window.location.search);
+const yogaStyle = urlParams.get('style') || 'hatha';
+const styleNames = {
+    'hatha': 'Hatha Yoga',
+    'raja': 'Raja Yoga',
+    'karma': 'Karma Yoga',
+    'bhakti': 'Bhakti Yoga',
+    'jnana': 'Jnana Yoga',
+    'kundalini': 'Kundalini Yoga',
+    'mantra': 'Mantra Yoga',
+    'tantra': 'Tantra Yoga'
+};
+yogaStyleEl.textContent = styleNames[yogaStyle] || 'Hatha Yoga';
+
+// Check API health on load
+async function checkAPIHealth() {
+    try {
+        const response = await fetch(`${API_URL}/health`);
+        const data = await response.json();
+        
+        if (data.status === "healthy") {
+            statusEl.innerHTML = '<span class="status-online">● Connected</span>';
+            inputBox.disabled = false;
+            sendBtn.disabled = false;
+        } else {
+            throw new Error("API not healthy");
+        }
+    } catch (error) {
+        statusEl.innerHTML = '<span class="status-offline">● Offline</span>';
+        console.error("API health check failed:", error);
+        addErrorMessage("Unable to connect to AI server. Please make sure the backend is running.");
+    }
+}
+
+// Add error message to chat
+function addErrorMessage(text) {
+    const errorRow = document.createElement("div");
+    errorRow.className = "message-row ai";
+    const avatar = document.createElement("img");
+    avatar.src = "https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png";
+    avatar.className = "avatar-small";
+    const msg = document.createElement("div");
+    msg.className = "message error-message";
+    msg.innerText = text;
+    errorRow.appendChild(avatar);
+    errorRow.appendChild(msg);
+    chatBox.appendChild(errorRow);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Send message to API
+async function sendMessage() {
+    const userText = inputBox.value.trim();
+    if (!userText) return;
+
+    // Disable input while processing
+    inputBox.disabled = true;
+    sendBtn.disabled = true;
+
+    // Display user message
+    const userRow = document.createElement("div");
+    userRow.className = "message-row user";
+    const userMsg = document.createElement("div");
+    userMsg.className = "message";
+    userMsg.innerText = userText;
+    userRow.appendChild(userMsg);
+    chatBox.appendChild(userRow);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    inputBox.value = "";
+
+    // Show typing indicator
+    const typingRow = document.createElement("div");
+    typingRow.className = "message-row ai";
+    typingRow.id = "typingIndicator";
+    const typingAvatar = document.createElement("img");
+    typingAvatar.src = "https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png";
+    typingAvatar.className = "avatar-small";
+    const typingBubble = document.createElement("div");
+    typingBubble.className = "message typing";
+    typingBubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+    typingRow.appendChild(typingAvatar);
+    typingRow.appendChild(typingBubble);
+    chatBox.appendChild(typingRow);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+        // Call API
+        const response = await fetch(`${API_URL}/chat`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                message: userText,
+                session_id: SESSION_ID
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Remove typing indicator
+        document.getElementById("typingIndicator")?.remove();
+
+        // Display AI response
+        const aiRow = document.createElement("div");
+        aiRow.className = "message-row ai";
+        const aiAvatar = document.createElement("img");
+        aiAvatar.src = "https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png";
+        aiAvatar.className = "avatar-small";
+        const aiMsg = document.createElement("div");
+        aiMsg.className = "message";
+        aiMsg.innerText = data.response;
+        aiRow.appendChild(aiAvatar);
+        aiRow.appendChild(aiMsg);
+        chatBox.appendChild(aiRow);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+    } catch (error) {
+        console.error("Error sending message:", error);
+        document.getElementById("typingIndicator")?.remove();
+        addErrorMessage("Sorry, I encountered an error. Please try again or check if the server is running.");
+    } finally {
+        // Re-enable input
+        inputBox.disabled = false;
+        sendBtn.disabled = false;
+        inputBox.focus();
+    }
+}
+
+// Enter key support
+inputBox.addEventListener("keypress", function(e) {
+    if (e.key === "Enter" && !inputBox.disabled) {
+        sendMessage();
+    }
+});
+
+// Check health on load
+checkAPIHealth();
+</script>
+
+</body>
+</html>
