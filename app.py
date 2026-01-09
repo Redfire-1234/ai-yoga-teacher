@@ -1,3 +1,5 @@
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -74,6 +76,20 @@ async def health_check():
         "status": "healthy",
         "rag_engine": "initialized" if rag_engine else "not initialized"
     }
+
+
+# Serve static HTML files
+@app.get("/", response_class=FileResponse)
+async def serve_landing():
+    return FileResponse("index.html")
+
+@app.get("/styles.html", response_class=FileResponse)
+async def serve_styles():
+    return FileResponse("styles.html")
+
+@app.get("/chat.html", response_class=FileResponse)
+async def serve_chat():
+    return FileResponse("chat.html")
 
 
 # Main chat endpoint
@@ -167,3 +183,4 @@ if __name__ == "__main__":
         port=8000,
         reload=True
     )
+
