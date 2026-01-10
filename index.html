@@ -1,285 +1,190 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Yoga Teacher - Welcome</title>
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family:"Segoe UI", Tahoma, sans-serif; }
-        body {
-            height: 100vh; width: 100vw;
-            background: linear-gradient(135deg, #4a3c3c, #6b4545);
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden; position: relative;
-        }
-        body::after {
-            content:""; position:absolute; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.5); z-index:1;
-        }
-        .screen { text-align:center; color:#f5f5f5; z-index:2; position:relative; animation: fadeIn 1s; }
-        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-        .avatar img {
-            max-width:350px; max-height:350px; object-fit:contain; border-radius:20px;
-            mix-blend-mode: multiply; filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
-            animation: float 4s ease-in-out infinite;
-        }
-        @keyframes float { 0%{transform:translateY(0);}50%{transform:translateY(-15px);}100%{transform:translateY(0);} }
-        h1 { font-size:48px; margin:30px 0; text-shadow:0 2px 12px rgba(0,0,0,0.7); }
-        p { font-size:18px; margin-bottom:30px; opacity:0.9; }
-        button {
-            padding:18px 50px; font-size:20px; border:none; border-radius:35px;
-            background: rgba(168,224,99,0.9); color:#1a1a1a; cursor:pointer; font-weight:bold;
-            transition: all 0.3s;
-        }
-        button:hover { background: rgba(139,195,74,0.9); transform:scale(1.05); }
-    </style>
-</head>
-<body>
-    <div class="screen">
-        <div class="avatar">
-            <img src="https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png" alt="Yoga Avatar">
-        </div>
-        <h1>Welcome to the World of Yoga</h1>
-        <p>Your AI-powered journey to wellness begins here</p>
-        <button onclick="window.location.href='styles.html'">Get Started</button>
-    </div>
-</body>
-</html>
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from typing import List, Dict
+import uvicorn
+from rag_engine import RAGEngine
+from config import settings
+import logging
 
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>AI Yoga Teacher</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:"Segoe UI", Tahoma, sans-serif; }
-body {
-    height:100vh; width:100vw;
-    background: linear-gradient(135deg, #1E1E2F, #2A2A45);
-    display:flex; justify-content:center; align-items:center;
-    overflow:hidden; color:#F5F5F5;
-}
-.container {
-    width:90%; height:85%; display:flex; border-radius:20px; overflow:hidden;
-    box-shadow:0 10px 40px rgba(0,0,0,0.6);
-}
-.left-panel {
-    flex:0 0 300px; background: rgba(30,30,50,0.6); backdrop-filter: blur(10px);
-    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-    padding:30px 20px; gap:20px;
-}
-.avatar { width:180px; border-radius:50%; animation: float 4s ease-in-out infinite; }
-.ai-name { font-size:20px; font-weight:bold; text-align:center; }
-.ai-status { font-size:14px; color:#A0FFA0; text-align:center; }
-.connection-status {
-    font-size:12px; padding:5px 10px; border-radius:15px;
-    background: rgba(255,255,255,0.1); margin-top:10px;
-}
-.status-online { color:#A0FFA0; }
-.status-offline { color:#FF6B6B; }
-.right-panel {
-    flex:1; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);
-    display:flex; flex-direction:column; justify-content:flex-end; padding:20px;
-}
-.chat-box {
-    flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:12px; margin-bottom:15px;
-}
-.message-row { display:flex; align-items:flex-end; gap:10px; opacity:0; animation: fadeIn 0.5s forwards; }
-.message-row.ai { justify-content:flex-start; }
-.message-row.user { justify-content:flex-end; }
-.avatar-small { width:40px; height:40px; border-radius:50%; animation: float 4s ease-in-out infinite; }
-.message { max-width:70%; padding:12px 16px; border-radius:20px; font-size:16px; word-wrap: break-word; }
-.user .message { background:#a8e063; color:#1a1a1a; border-bottom-right-radius:0; border-bottom-left-radius:20px; }
-.ai .message { border-bottom-left-radius:0; border-bottom-right-radius:20px; background: rgba(255,255,255,0.9); color:#1a1a1a; }
-.error-message { background:#FF6B6B !important; color:#fff !important; }
-.input-area { display:flex; gap:10px; }
-input { flex:1; padding:15px; border-radius:30px; border:none; font-size:16px; outline:none; background: rgba(255,255,255,0.08); color:#F5F5F5; }
-input::placeholder { color:#ccc; }
-input:disabled { opacity:0.5; cursor:not-allowed; }
-button { padding:15px 30px; border-radius:30px; border:none; background:#a8e063; font-weight:bold; cursor:pointer; transition: all 0.3s; }
-button:hover:not(:disabled) { background:#88c455; transform: scale(1.05); }
-button:disabled { opacity:0.5; cursor:not-allowed; }
-@keyframes float { 0%{transform:translateY(0);}50%{transform:translateY(-5px);}100%{transform:translateY(0);} }
-@keyframes fadeIn { to{opacity:1;} }
-.typing { display:flex; align-items:center; gap:5px; }
-.dot { width:8px; height:8px; background:#ccc; border-radius:50%; animation:bounce 1s infinite; }
-.dot:nth-child(2) { animation-delay:0.2s; }
-.dot:nth-child(3) { animation-delay:0.4s; }
-@keyframes bounce { 0%,80%,100%{transform:scale(0);}40%{transform:scale(1);} }
-</style>
-</head>
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-<body>
+# Initialize FastAPI app
+app = FastAPI(
+    title="AI Yoga Teacher API",
+    description="RAG-powered Yoga guidance with conversation memory",
+    version="1.0.0"
+)
 
-<div class="container">
-    <!-- Left panel -->
-    <div class="left-panel">
-        <img src="https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png" class="avatar" alt="AI Avatar">
-        <div class="ai-name">Yoga Master Dhalsim</div>
-        <div class="ai-status">🧘‍♂️ Ready to guide you</div>
-        <div class="connection-status" id="connectionStatus">
-            <span class="status-offline">● Connecting...</span>
-        </div>
-    </div>
+# CORS middleware for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Update with your frontend URL in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    <!-- Right panel -->
-    <div class="right-panel">
-        <div class="chat-box" id="chatBox">
-            <div class="message-row ai">
-                <img src="https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png" class="avatar-small" alt="AI Avatar">
-                <div class="message">Namaste 🙏 I am your AI Yoga Teacher. How can I guide you today?</div>
-            </div>
-        </div>
+# Initialize RAG Engine
+rag_engine = None
 
-        <!-- Input area -->
-        <div class="input-area">
-            <input id="userInput" type="text" placeholder="Type your message..." disabled>
-            <button onclick="sendMessage()" id="sendBtn" disabled>Send</button>
-        </div>
-    </div>
-</div>
+# In-memory conversation storage (use Redis/DB for production)
+conversations: Dict[str, List[Dict]] = {}
 
-<script>
-// Configuration - UPDATE THIS WITH YOUR RENDER URL AFTER DEPLOYMENT
-const API_URL = "https://ai-yoga-teacher.onrender.com"; // Change to your Render URL: https://your-app.onrender.com
-const SESSION_ID = "user_" + Math.random().toString(36).substr(2, 9);
 
-const chatBox = document.getElementById("chatBox");
-const inputBox = document.getElementById("userInput");
-const sendBtn = document.getElementById("sendBtn");
-const statusEl = document.getElementById("connectionStatus");
+# Pydantic models
+class ChatRequest(BaseModel):
+    message: str
+    session_id: str = "default"
+    
+class ChatResponse(BaseModel):
+    response: str
+    session_id: str
+    sources: List[str] = []
 
-// Check API health on load
-async function checkAPIHealth() {
-    try {
-        const response = await fetch(`${API_URL}/health`);
-        const data = await response.json();
+
+# Startup event
+@app.on_event("startup")
+async def startup_event():
+    global rag_engine
+    try:
+        logger.info("Initializing RAG Engine...")
+        rag_engine = RAGEngine()
+        logger.info("RAG Engine initialized successfully!")
+    except Exception as e:
+        logger.error(f"Failed to initialize RAG Engine: {e}")
+        raise
+
+
+# Serve Frontend HTML Pages
+@app.get("/", response_class=FileResponse)
+async def serve_landing():
+    """Serve the landing page"""
+    return FileResponse("index.html")
+
+
+@app.get("/styles.html", response_class=FileResponse)
+async def serve_styles():
+    """Serve the yoga styles selection page"""
+    return FileResponse("styles.html")
+
+
+@app.get("/chat.html", response_class=FileResponse)
+async def serve_chat():
+    """Serve the chat interface"""
+    return FileResponse("chat.html")
+
+
+# API Endpoints
+@app.get("/api")
+async def api_root():
+    """API root endpoint"""
+    return {
+        "status": "online",
+        "message": "AI Yoga Teacher API is running",
+        "version": "1.0.0"
+    }
+
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "rag_engine": "initialized" if rag_engine else "not initialized"
+    }
+
+
+# Main chat endpoint
+@app.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    try:
+        if not rag_engine:
+            raise HTTPException(status_code=503, detail="RAG Engine not initialized")
         
-        if (data.status === "healthy") {
-            statusEl.innerHTML = '<span class="status-online">● Connected</span>';
-            inputBox.disabled = false;
-            sendBtn.disabled = false;
-        } else {
-            throw new Error("API not healthy");
-        }
-    } catch (error) {
-        statusEl.innerHTML = '<span class="status-offline">● Offline</span>';
-        console.error("API health check failed:", error);
-        addErrorMessage("Unable to connect to AI server. Please check if the backend is running.");
+        session_id = request.session_id
+        user_message = request.message.strip()
+        
+        if not user_message:
+            raise HTTPException(status_code=400, detail="Message cannot be empty")
+        
+        # Initialize conversation history for new sessions
+        if session_id not in conversations:
+            conversations[session_id] = []
+        
+        # Get conversation history
+        history = conversations[session_id]
+        
+        # Get RAG response
+        response, sources = rag_engine.get_response(
+            query=user_message,
+            conversation_history=history
+        )
+        
+        # Update conversation history
+        conversations[session_id].append({
+            "role": "user",
+            "content": user_message
+        })
+        conversations[session_id].append({
+            "role": "assistant",
+            "content": response
+        })
+        
+        # Keep only last 10 exchanges (20 messages) to manage memory
+        if len(conversations[session_id]) > 20:
+            conversations[session_id] = conversations[session_id][-20:]
+        
+        logger.info(f"Session {session_id}: Response generated successfully")
+        
+        return ChatResponse(
+            response=response,
+            session_id=session_id,
+            sources=sources
+        )
+        
+    except Exception as e:
+        logger.error(f"Error in chat endpoint: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Get conversation history
+@app.get("/conversation/{session_id}")
+async def get_conversation(session_id: str):
+    if session_id not in conversations:
+        return {"session_id": session_id, "history": []}
+    
+    return {
+        "session_id": session_id,
+        "history": conversations[session_id]
     }
-}
 
-// Add error message to chat
-function addErrorMessage(text) {
-    const errorRow = document.createElement("div");
-    errorRow.className = "message-row ai";
-    const avatar = document.createElement("img");
-    avatar.src = "https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png";
-    avatar.className = "avatar-small";
-    const msg = document.createElement("div");
-    msg.className = "message error-message";
-    msg.innerText = text;
-    errorRow.appendChild(avatar);
-    errorRow.appendChild(msg);
-    chatBox.appendChild(errorRow);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
 
-// Send message to API
-async function sendMessage() {
-    const userText = inputBox.value.trim();
-    if (!userText) return;
+# Clear conversation history
+@app.delete("/conversation/{session_id}")
+async def clear_conversation(session_id: str):
+    if session_id in conversations:
+        del conversations[session_id]
+        return {"message": f"Conversation {session_id} cleared"}
+    
+    return {"message": f"Conversation {session_id} not found"}
 
-    // Disable input while processing
-    inputBox.disabled = true;
-    sendBtn.disabled = true;
 
-    // Display user message
-    const userRow = document.createElement("div");
-    userRow.className = "message-row user";
-    const userMsg = document.createElement("div");
-    userMsg.className = "message";
-    userMsg.innerText = userText;
-    userRow.appendChild(userMsg);
-    chatBox.appendChild(userRow);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    inputBox.value = "";
-
-    // Show typing indicator
-    const typingRow = document.createElement("div");
-    typingRow.className = "message-row ai";
-    typingRow.id = "typingIndicator";
-    const typingAvatar = document.createElement("img");
-    typingAvatar.src = "https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png";
-    typingAvatar.className = "avatar-small";
-    const typingBubble = document.createElement("div");
-    typingBubble.className = "message typing";
-    typingBubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-    typingRow.appendChild(typingAvatar);
-    typingRow.appendChild(typingBubble);
-    chatBox.appendChild(typingRow);
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    try {
-        // Call API
-        const response = await fetch(`${API_URL}/chat`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                message: userText,
-                session_id: SESSION_ID
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // Remove typing indicator
-        document.getElementById("typingIndicator")?.remove();
-
-        // Display AI response
-        const aiRow = document.createElement("div");
-        aiRow.className = "message-row ai";
-        const aiAvatar = document.createElement("img");
-        aiAvatar.src = "https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png";
-        aiAvatar.className = "avatar-small";
-        const aiMsg = document.createElement("div");
-        aiMsg.className = "message";
-        aiMsg.innerText = data.response;
-        aiRow.appendChild(aiAvatar);
-        aiRow.appendChild(aiMsg);
-        chatBox.appendChild(aiRow);
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-    } catch (error) {
-        console.error("Error sending message:", error);
-        document.getElementById("typingIndicator")?.remove();
-        addErrorMessage("Sorry, I encountered an error. Please try again.");
-    } finally {
-        // Re-enable input
-        inputBox.disabled = false;
-        sendBtn.disabled = false;
-        inputBox.focus();
+# Get all active sessions
+@app.get("/sessions")
+async def get_sessions():
+    return {
+        "active_sessions": list(conversations.keys()),
+        "total_sessions": len(conversations)
     }
-}
 
-// Enter key support
-inputBox.addEventListener("keypress", function(e) {
-    if (e.key === "Enter" && !inputBox.disabled) {
-        sendMessage();
-    }
-});
 
-// Check health on load
-checkAPIHealth();
-</script>
-
-</body>
-
-</html>
- -->
+if __name__ == "__main__":
+    uvicorn.run(
+        "app:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
