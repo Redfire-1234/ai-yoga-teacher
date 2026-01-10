@@ -1,3 +1,4 @@
+
 # import faiss
 # import pickle
 # import numpy as np
@@ -57,10 +58,10 @@
 #         This uses NO local RAM for model loading!
 #         """
 #         try:
-#             api_url = "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2"
-#             # api_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{settings.EMBEDDING_MODEL}"
+#             # Updated to new HuggingFace router endpoint
+#             api_url = f"https://router.huggingface.co/models/{settings.EMBEDDING_MODEL}"
             
-#             headers = {}
+#             headers = {"Content-Type": "application/json"}
 #             if self.hf_token:
 #                 headers["Authorization"] = f"Bearer {self.hf_token}"
             
@@ -165,6 +166,7 @@
 #         results = self.search(query, top_k)
 #         return [doc[:100] + "..." if len(doc) > 100 else doc for doc, _ in results]
 
+
 import faiss
 import pickle
 import numpy as np
@@ -224,8 +226,8 @@ class VectorStore:
         This uses NO local RAM for model loading!
         """
         try:
-            # Updated to new HuggingFace router endpoint
-            api_url = f"https://router.huggingface.co/models/{settings.EMBEDDING_MODEL}"
+            # Updated to serverless inference API
+            api_url = f"https://api-inference.huggingface.co/models/{settings.EMBEDDING_MODEL}"
             
             headers = {"Content-Type": "application/json"}
             if self.hf_token:
@@ -234,7 +236,7 @@ class VectorStore:
             response = requests.post(
                 api_url,
                 headers=headers,
-                json={"inputs": query, "options": {"wait_for_model": True}}
+                json={"inputs": query}
             )
             
             if response.status_code != 200:
