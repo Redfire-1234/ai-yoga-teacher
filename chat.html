@@ -96,8 +96,8 @@ button:disabled { opacity:0.5; cursor:not-allowed; }
 <div class="container">
     <!-- Left panel -->
     <div class="left-panel">
-        <img src="https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png" class="avatar" alt="AI Avatar">
-        <div class="ai-name">Yoga Master Dhalsim</div>
+        <img id="teacherAvatar" src="dhalsim.png" class="avatar" alt="AI Avatar">
+        <div class="ai-name" id="teacherName">Yoga Master Dhalsim</div>
         <div class="ai-status">🧘‍♂️ Ready to guide you</div>
         <div class="yoga-style" id="yogaStyle">Hatha Yoga</div>
         <div class="connection-status" id="connectionStatus">
@@ -110,7 +110,7 @@ button:disabled { opacity:0.5; cursor:not-allowed; }
     <div class="right-panel">
         <div class="chat-box" id="chatBox">
             <div class="message-row ai">
-                <img src="https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png" class="avatar-small" alt="AI Avatar">
+                <img id="initialAvatar" src="dhalsim.png" class="avatar-small" alt="AI Avatar">
                 <div class="message">Namaste 🙏 I am your AI Yoga Teacher. How can I guide you today?</div>
             </div>
         </div>
@@ -136,10 +136,15 @@ const inputBox = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
 const statusEl = document.getElementById("connectionStatus");
 const yogaStyleEl = document.getElementById("yogaStyle");
+const teacherAvatarEl = document.getElementById("teacherAvatar");
+const teacherNameEl = document.getElementById("teacherName");
+const initialAvatarEl = document.getElementById("initialAvatar");
 
-// Get yoga style from URL
+// Get yoga style and teacher from URL
 const urlParams = new URLSearchParams(window.location.search);
 const yogaStyle = urlParams.get('style') || 'hatha';
+const teacher = urlParams.get('teacher') || 'dhalsim';
+
 const styleNames = {
     'hatha': 'Hatha Yoga',
     'raja': 'Raja Yoga',
@@ -150,6 +155,20 @@ const styleNames = {
     'mantra': 'Mantra Yoga',
     'tantra': 'Tantra Yoga'
 };
+
+// Set teacher based on URL parameter
+let avatarImage = 'dhalsim.png';
+let teacherName = 'Yoga Master Dhalsim';
+
+if (teacher === 'devi') {
+    avatarImage = 'wdhalsim.png';
+    teacherName = 'Yoga Master Devi';
+}
+
+// Update UI with correct teacher
+teacherAvatarEl.src = avatarImage;
+teacherNameEl.textContent = teacherName;
+initialAvatarEl.src = avatarImage;
 yogaStyleEl.textContent = styleNames[yogaStyle] || 'Hatha Yoga';
 
 // Check API health on load
@@ -177,7 +196,7 @@ function addErrorMessage(text) {
     const errorRow = document.createElement("div");
     errorRow.className = "message-row ai";
     const avatar = document.createElement("img");
-    avatar.src = "https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png";
+    avatar.src = avatarImage;
     avatar.className = "avatar-small";
     const msg = document.createElement("div");
     msg.className = "message error-message";
@@ -210,7 +229,7 @@ async function sendMessage() {
     typingRow.className = "message-row ai";
     typingRow.id = "typingIndicator";
     const typingAvatar = document.createElement("img");
-    typingAvatar.src = "https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png";
+    typingAvatar.src = avatarImage;
     typingAvatar.className = "avatar-small";
     const typingBubble = document.createElement("div");
     typingBubble.className = "message typing";
@@ -242,7 +261,7 @@ async function sendMessage() {
         const aiRow = document.createElement("div");
         aiRow.className = "message-row ai";
         const aiAvatar = document.createElement("img");
-        aiAvatar.src = "https://raw.githubusercontent.com/Redfire-1234/ai-yoga-teacher/main/dhalsim.png";
+        aiAvatar.src = avatarImage;
         aiAvatar.className = "avatar-small";
         const aiMsg = document.createElement("div");
         aiMsg.className = "message";
