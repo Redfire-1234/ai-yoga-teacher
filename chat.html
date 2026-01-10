@@ -124,12 +124,10 @@ button:disabled { opacity:0.5; cursor:not-allowed; }
 </div>
 
 <script>
-// Configuration - CHANGE THIS TO YOUR RENDER URL AFTER DEPLOYMENT
 // Auto-detect environment
 const API_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:8000'  // Local development
+    ? 'http://localhost:8000'  
     : window.location.origin;
-// const API_URL = "https://your-app.onrender.com"; // Uncomment for production
 
 const SESSION_ID = "user_" + Math.random().toString(36).substr(2, 9);
 
@@ -195,11 +193,9 @@ async function sendMessage() {
     const userText = inputBox.value.trim();
     if (!userText) return;
 
-    // Disable input while processing
     inputBox.disabled = true;
     sendBtn.disabled = true;
 
-    // Display user message
     const userRow = document.createElement("div");
     userRow.className = "message-row user";
     const userMsg = document.createElement("div");
@@ -210,7 +206,6 @@ async function sendMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
     inputBox.value = "";
 
-    // Show typing indicator
     const typingRow = document.createElement("div");
     typingRow.className = "message-row ai";
     typingRow.id = "typingIndicator";
@@ -226,7 +221,6 @@ async function sendMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        // Call API
         const response = await fetch(`${API_URL}/chat`, {
             method: "POST",
             headers: {
@@ -243,11 +237,8 @@ async function sendMessage() {
         }
 
         const data = await response.json();
-
-        // Remove typing indicator
         document.getElementById("typingIndicator")?.remove();
 
-        // Display AI response
         const aiRow = document.createElement("div");
         aiRow.className = "message-row ai";
         const aiAvatar = document.createElement("img");
@@ -264,23 +255,20 @@ async function sendMessage() {
     } catch (error) {
         console.error("Error sending message:", error);
         document.getElementById("typingIndicator")?.remove();
-        addErrorMessage("Sorry, I encountered an error. Please try again or check if the server is running.");
+        addErrorMessage("Sorry, I encountered an error. Please try again.");
     } finally {
-        // Re-enable input
         inputBox.disabled = false;
         sendBtn.disabled = false;
         inputBox.focus();
     }
 }
 
-// Enter key support
 inputBox.addEventListener("keypress", function(e) {
     if (e.key === "Enter" && !inputBox.disabled) {
         sendMessage();
     }
 });
 
-// Check health on load
 checkAPIHealth();
 </script>
 
