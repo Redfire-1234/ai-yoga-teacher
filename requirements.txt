@@ -6,7 +6,7 @@ pydantic-settings==2.1.0
 python-multipart==0.0.6
 
 # Groq API (LLM only)
-groq==0.4.2
+groq>=0.11.0
 
 # Vector Store - LOCAL embeddings
 faiss-cpu==1.8.0
