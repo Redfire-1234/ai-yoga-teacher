@@ -5,10 +5,36 @@ services:
     region: oregon
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1
     envVars:
       - key: GROQ_API_KEY
         sync: false
       - key: PYTHON_VERSION
         value: 3.11.0
     healthCheckPath: /health
+```
+
+---
+
+## ✅ Save These Files:
+
+1. **Create/Replace `requirements.txt`** in your project root (same folder as `app.py`)
+2. **Create/Replace `render.yaml`** in your project root
+
+Your folder structure should look like:
+```
+ai-yoga-teacher/
+├── app.py
+├── rag_engine.py
+├── vectorstore.py          ← Replace with new version
+├── config.py
+├── requirements.txt        ← Use this one
+├── render.yaml            ← Use this one
+├── .env
+├── index.html
+├── styles.html
+├── chat.html
+├── yoga.png
+├── women.png
+├── dhalsim.png
+└── wdhalsim.png
