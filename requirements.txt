@@ -1,12 +1,23 @@
-fastapi>=0.109.0
-uvicorn[standard]>=0.27.0
-pydantic>=2.5.0
-pydantic-settings>=2.1.0
-python-multipart>=0.0.6
-groq>=0.4.0
-faiss-cpu>=1.8.0
-requests>=2.31.0
-huggingface-hub>=0.20.0
-numpy>=1.24.0
-python-dotenv>=1.0.0
-gunicorn>=21.0.0
+# FastAPI and Server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+python-multipart==0.0.6
+
+# Groq API (LLM only)
+groq==0.4.2
+
+# Vector Store - LOCAL embeddings
+faiss-cpu==1.8.0
+sentence-transformers==2.3.1
+
+# HuggingFace (for downloading files only)
+huggingface-hub==0.20.2
+
+# Utilities
+numpy==1.26.3
+python-dotenv==1.0.0
+
+# Production server
+gunicorn==21.2.0
