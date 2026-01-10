@@ -57,7 +57,8 @@ class VectorStore:
         This uses NO local RAM for model loading!
         """
         try:
-            api_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{settings.EMBEDDING_MODEL}"
+            api_url = "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2"
+            # api_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{settings.EMBEDDING_MODEL}"
             
             headers = {}
             if self.hf_token:
@@ -163,3 +164,4 @@ class VectorStore:
         """
         results = self.search(query, top_k)
         return [doc[:100] + "..." if len(doc) > 100 else doc for doc, _ in results]
+
